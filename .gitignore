@@ -1,0 +1,9 @@
+﻿$root = 'C:\project\fatemehvahedi8581-boop\WorkerPlatform1'; Set-Location $root; Write-Output '--- status ---'; git status --short --branch; Write-Output '--- gitignore ---'; if (Test-Path .gitignore) { Get-Content .gitignore } else { Write-Output 'MISSING' }; Write-Output '--- tracked targets ---'; git ls-files .vs WorkerPlatform.env
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+
+# ===== IDE =====
+.idea/
+*.swp
