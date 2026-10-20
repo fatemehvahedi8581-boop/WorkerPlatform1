@@ -1,4 +1,5 @@
 using Application.Users.Commands.Register;
+using Application.Users.Commands.Login;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,6 +25,22 @@ public class UsersController : ControllerBase
             var userId = await _mediator.Send(command);
 
             return Ok(new { Message = "ثبت‌نام با موفقیت انجام شد.", UserId = userId });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Error = ex.Message });
+        }
+    }
+
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] LoginUserDto dto)
+    {
+        try
+        {
+            var command = new LoginUserCommand(dto.PhoneNumber, dto.Password);
+            var token = await _mediator.Send(command);
+
+            return Ok(new { Message = "ورود موفقیت‌آمیز بود.", Token = token });
         }
         catch (Exception ex)
         {
