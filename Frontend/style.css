@@ -1,0 +1,22 @@
+body {
+    font-family: 'Vazirmatn', Tahoma, sans-serif;
+}
+
+.job-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: none;
+    border-radius: 12px;
+}
+
+.job-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+}
+
+.price-badge {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 8px;
+}
