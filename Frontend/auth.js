@@ -25,9 +25,13 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
             });
             document.getElementById('login-tab').click();
         } else {
+            const serverError = data.error || data.Error || '';
+            const errorMessage = serverError.includes('شماره موبایل') || serverError.includes('قبلاً')
+                ? 'این شماره موبایل قبلاً ثبت‌نام کرده است.'
+                : serverError || 'مشکلی پیش آمد';
             Swal.fire({
                 title: 'خطا!',
-                text: data.error || data.Error || 'مشکلی پیش آمد',
+                text: errorMessage,
                 icon: 'error',
                 confirmButtonText: 'باشه'
             });
@@ -66,9 +70,10 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             });
             window.location.href = 'index.html';
         } else {
+            const serverError = data.error || data.Error || '';
             Swal.fire({
                 title: 'خطا!',
-                text: data.error || data.Error || 'شماره موبایل یا رمز عبور اشتباه است',
+                text: serverError || 'شماره موبایل یا رمز عبور اشتباه است',
                 icon: 'error',
                 confirmButtonText: 'باشه'
             });

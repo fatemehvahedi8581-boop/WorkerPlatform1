@@ -21,9 +21,16 @@ public class JobAdsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var query = new GetAllJobAdsQuery();
-        var result = await _mediator.Send(query);
-        return Ok(result);
+        try
+        {
+            var query = new GetAllJobAdsQuery();
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Error = ex.Message });
+        }
     }
 
     [HttpPost]

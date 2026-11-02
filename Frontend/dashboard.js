@@ -59,10 +59,11 @@ async function loadProfile() {
                             <button class="btn btn-sm btn-danger" onclick="updateStatus(${h.requestId}, 'Rejected')">رد</button>
                         </div>
                     `;
-                } else if (h.status === 'Accepted' && !h.rating) {
+                } else if (h.status === 'Accepted') {
                     actionButtons = `
                         <div class="mt-2">
-                            <button class="btn btn-sm btn-warning" onclick="showReviewModal(${h.requestId})">ثبت امتیاز و نظر</button>
+                            <button class="btn btn-sm btn-primary" onclick="updateStatus(${h.requestId}, 'Completed')">اتمام کار</button>
+                            <button class="btn btn-sm btn-warning ms-2" onclick="showReviewModal(${h.requestId})">ثبت امتیاز</button>
                         </div>
                     `;
                 }

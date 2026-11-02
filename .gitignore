@@ -12,6 +12,7 @@ obj/
 *.db-shm
 *.db-wal
 *.sqlite
+screenshots/*.png
 
 # ===== Logs =====
 *.log
