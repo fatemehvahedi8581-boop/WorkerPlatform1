@@ -1,7 +1,10 @@
 using Application.Users.Commands.Register;
 using Application.Users.Commands.Login;
+using Application.Users.Queries.GetUserProfile;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace WorkerPlatform.API.Controllers;
 
@@ -46,5 +49,18 @@ public class UsersController : ControllerBase
         {
             return BadRequest(new { Error = ex.Message });
         }
+    }
+
+    [HttpGet("{id}/profile")]
+    [Authorize]
+    public async Task<IActionResult> GetProfile(int id)
+    {
+        try
+        {
+            var query = new GetUserProfileQuery(id);
+            var result = await _mediator.Send(query);
+            return Ok(result);
+        }
+        catch (Exception ex) { return BadRequest(new { Error = ex.Message }); }
     }
 }

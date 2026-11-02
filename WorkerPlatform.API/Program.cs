@@ -29,8 +29,26 @@ builder.Services.AddDbContext<Infrastructure.Persistence.AppDbContext>(options =
     options.UseSqlite("Data Source=workerplatform.db"));
 builder.Services.AddScoped<IApplicationDbContext>(provider =>
     provider.GetRequiredService<Infrastructure.Persistence.AppDbContext>());
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer((document, _, _) =>
+    {
+        document.Info.Title = "WorkerPlatform API";
+        document.Info.Version = "v1";
+        document.Info.Description = "API برای اتصال کارگران و کارفرمایان";
+        return Task.CompletedTask;
+    });
+});
 
 var app = builder.Build();
 
@@ -42,6 +60,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 
