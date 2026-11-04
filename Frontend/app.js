@@ -65,14 +65,27 @@ async function loadJobAds() {
     }
 }
 
+function getTokenRole(token) {
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+        return payload.role || payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+    } catch {
+        return null;
+    }
+}
+
 function updateNavbar() {
     const token = localStorage.getItem('token');
     const navActions = document.getElementById('navActions');
 
     if (token) {
+        const createJobLink = getTokenRole(token) === 'Employer'
+            ? '<a href="create-job.html" class="btn btn-warning me-2 fw-bold">+ ثبت آگهی</a>'
+            : '';
+
         navActions.innerHTML = `
             <a href="dashboard.html" class="btn btn-info text-white me-2 fw-bold">داشبورد من</a>
-            <a href="create-job.html" class="btn btn-warning me-2 fw-bold">+ ثبت آگهی</a>
+            ${createJobLink}
             <button onclick="logout()" class="btn btn-outline-light">خروج</button>
         `;
     } else {

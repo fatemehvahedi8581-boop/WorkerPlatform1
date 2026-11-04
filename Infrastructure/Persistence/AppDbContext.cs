@@ -14,6 +14,7 @@ public class AppDbContext : DbContext, IApplicationDbContext
     public DbSet<JobAd> JobAds { get; set; }
     public DbSet<JobRequest> JobRequests { get; set; }
     public DbSet<Review> Reviews { get; set; }
+    public DbSet<WorkerSkill> WorkerSkills { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -30,6 +31,26 @@ public class AppDbContext : DbContext, IApplicationDbContext
             .WithMany(j => j.JobRequests)
             .HasForeignKey(jr => jr.JobAdId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<WorkerSkill>()
+            .HasOne(s => s.Worker)
+            .WithMany(u => u.Skills)
+            .HasForeignKey(s => s.WorkerId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<WorkerSkill>()
+            .Property(s => s.Name)
+            .HasMaxLength(100)
+            .IsRequired();
+
+        modelBuilder.Entity<WorkerSkill>()
+            .Property(s => s.Level)
+            .HasMaxLength(30)
+            .IsRequired();
+
+        modelBuilder.Entity<WorkerSkill>()
+            .HasIndex(s => new { s.WorkerId, s.Name })
+            .IsUnique();
 
         modelBuilder.Entity<JobRequest>()
             .HasOne(jr => jr.Worker)

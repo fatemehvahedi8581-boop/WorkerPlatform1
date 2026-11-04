@@ -33,7 +33,7 @@ public class JobRequestsController : ControllerBase
                 return Unauthorized(new { Error = "کاربر یافت نشد." });
 
             if (user.Role != "Worker")
-                return Forbid();
+                return StatusCode(StatusCodes.Status403Forbidden, new { Error = "کارفرما نمی‌تواند برای کارفرمایان دیگر درخواست انجام کار بدهد. فقط کارگر می‌تواند درخواست ارسال کند." });
 
             var jobAd = await _context.JobAds.FirstOrDefaultAsync(j => j.Id == jobAdId, cancellationToken);
             if (jobAd == null)

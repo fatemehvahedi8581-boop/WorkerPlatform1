@@ -12,7 +12,16 @@ public class UserProfileDto
     public string Role { get; set; } = string.Empty;
     public double AverageRating { get; set; }
     public int TotalReviews { get; set; }
+    public List<WorkerSkillProfileDto> Skills { get; set; } = new();
     public List<JobHistoryDto> JobHistory { get; set; } = new();
+}
+
+public class WorkerSkillProfileDto
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Level { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
 }
 
 public class JobHistoryDto
@@ -22,6 +31,8 @@ public class JobHistoryDto
     public string Status { get; set; } = string.Empty;
     public DateTime AppliedAt { get; set; }
     public int? Rating { get; set; }
+    public string WorkerName { get; set; } = string.Empty;
+    public List<WorkerSkillProfileDto> WorkerSkills { get; set; } = new();
 }
 
 public record GetUserProfileQuery(int UserId) : IRequest<UserProfileDto>;
@@ -34,6 +45,7 @@ public class GetUserProfileQueryHandler : IRequestHandler<GetUserProfileQuery, U
     public async Task<UserProfileDto> Handle(GetUserProfileQuery request, CancellationToken cancellationToken)
     {
         var user = await _context.Users
+            .Include(u => u.Skills)
             .FirstOrDefaultAsync(u => u.Id == request.UserId, cancellationToken);
 
         if (user == null)
@@ -48,6 +60,7 @@ public class GetUserProfileQueryHandler : IRequestHandler<GetUserProfileQuery, U
         var history = await _context.JobRequests
             .Include(r => r.JobAd)
             .Include(r => r.Review)
+            .Include(r => r.Worker)
             .Where(r => user.Role == "Worker" ? r.WorkerId == user.Id : r.JobAd.EmployerId == user.Id)
             .Select(r => new JobHistoryDto
             {
@@ -55,7 +68,18 @@ public class GetUserProfileQueryHandler : IRequestHandler<GetUserProfileQuery, U
                 JobTitle = r.JobAd.Title,
                 Status = r.Status,
                 AppliedAt = r.AppliedAt,
-                Rating = r.Review != null ? r.Review.Rating : null
+                Rating = r.Review != null ? r.Review.Rating : null,
+                WorkerName = r.Worker.FullName,
+                WorkerSkills = r.Worker.Skills
+                    .OrderBy(s => s.Name)
+                    .Select(s => new WorkerSkillProfileDto
+                    {
+                        Id = s.Id,
+                        Name = s.Name,
+                        Level = s.Level,
+                        Description = s.Description
+                    })
+                    .ToList()
             })
             .OrderByDescending(r => r.AppliedAt)
             .ToListAsync(cancellationToken);
@@ -68,6 +92,16 @@ public class GetUserProfileQueryHandler : IRequestHandler<GetUserProfileQuery, U
             Role = user.Role,
             AverageRating = Math.Round(avgRating, 1),
             TotalReviews = reviews.Count,
+            Skills = user.Skills
+                .OrderBy(s => s.Name)
+                .Select(s => new WorkerSkillProfileDto
+                {
+                    Id = s.Id,
+                    Name = s.Name,
+                    Level = s.Level,
+                    Description = s.Description
+                })
+                .ToList(),
             JobHistory = history
         };
     }

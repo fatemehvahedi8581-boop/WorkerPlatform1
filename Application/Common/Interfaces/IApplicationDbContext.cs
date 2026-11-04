@@ -9,5 +9,6 @@ public interface IApplicationDbContext
     DbSet<JobAd> JobAds { get; set; }
     DbSet<JobRequest> JobRequests { get; set; }
     DbSet<Review> Reviews { get; set; }
+    DbSet<WorkerSkill> WorkerSkills { get; set; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

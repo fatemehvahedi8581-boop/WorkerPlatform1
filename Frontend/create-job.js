@@ -1,5 +1,14 @@
 const API_BASE_URL = 'http://localhost:5067/api';
 
+function getTokenRole(token) {
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+        return payload.role || payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+    } catch {
+        return null;
+    }
+}
+
 document.getElementById('createJobForm').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -12,6 +21,17 @@ document.getElementById('createJobForm').addEventListener('submit', async (e) =>
             confirmButtonText: 'باشه'
         });
         window.location.href = 'auth.html';
+        return;
+    }
+
+    if (getTokenRole(token) !== 'Employer') {
+        Swal.fire({
+            title: 'دسترسی غیرمجاز',
+            text: 'فقط کارفرما می‌تواند آگهی ثبت کند.',
+            icon: 'error',
+            confirmButtonText: 'باشه'
+        });
+        window.location.href = 'index.html';
         return;
     }
 
@@ -30,7 +50,7 @@ document.getElementById('createJobForm').addEventListener('submit', async (e) =>
             body: JSON.stringify({ title, description, city, price })
         });
 
-        const data = await response.json();
+        const data = await response.json().catch(() => ({}));
 
         if (response.ok) {
             Swal.fire({
@@ -43,7 +63,7 @@ document.getElementById('createJobForm').addEventListener('submit', async (e) =>
         } else {
             Swal.fire({
                 title: 'خطا!',
-                text: 'خطا در ثبت آگهی: ' + (data.error || data.Error || 'مشکلی پیش آمد. آیا وارد شده‌اید؟'),
+                text: data.error || data.Error || 'کارگر اجازه ثبت آگهی ندارد. فقط کارفرما می‌تواند آگهی ثبت کند.',
                 icon: 'error',
                 confirmButtonText: 'باشه'
             });

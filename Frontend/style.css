@@ -1,5 +1,104 @@
+:root {
+    --site-bg: #f4f7fb;
+    --site-surface: #ffffff;
+    --site-text: #1f2937;
+    --site-muted: #64748b;
+    --site-primary: #2355a6;
+    --site-primary-dark: #173b78;
+    --site-accent: #f59e0b;
+    --site-border: #dbe4f0;
+}
+
+:root[data-theme="dark"] {
+    --site-bg: #111827;
+    --site-surface: #1f2937;
+    --site-text: #f3f4f6;
+    --site-muted: #cbd5e1;
+    --site-primary: #4f83d1;
+    --site-primary-dark: #315da0;
+    --site-accent: #fbbf24;
+    --site-border: #374151;
+    color-scheme: dark;
+}
+
+html,
+body {
+    min-height: 100%;
+}
+
 body {
     font-family: 'Vazirmatn', Tahoma, sans-serif;
+    background-color: var(--site-bg) !important;
+    color: var(--site-text);
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.navbar.bg-primary,
+.bg-primary {
+    background-color: var(--site-primary) !important;
+}
+
+.btn-primary {
+    background-color: var(--site-primary);
+    border-color: var(--site-primary);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: var(--site-primary-dark);
+    border-color: var(--site-primary-dark);
+}
+
+.card,
+.card-header,
+.card-footer,
+.list-group,
+.list-group-item,
+.form-control,
+.form-select {
+    background-color: var(--site-surface) !important;
+    color: var(--site-text);
+    border-color: var(--site-border);
+}
+
+.form-control::placeholder {
+    color: var(--site-muted);
+    opacity: 0.8;
+}
+
+.worker-skills {
+    color: var(--site-text);
+}
+
+.text-secondary,
+.text-muted {
+    color: var(--site-muted) !important;
+}
+
+.theme-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: #fff;
+    font-size: 0.85rem;
+}
+
+.theme-control select {
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 0.4rem;
+    padding: 0.25rem 0.45rem;
+    background: var(--site-surface);
+    color: var(--site-text);
+}
+
+.theme-control-floating {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    z-index: 1050;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.6rem;
+    background: var(--site-primary);
 }
 
 .job-card {
@@ -14,8 +113,8 @@ body {
 }
 
 .price-badge {
-    background-color: #e8f5e9;
-    color: #2e7d32;
+    background-color: #dbeafe;
+    color: #1e40af;
     font-weight: bold;
     padding: 5px 10px;
     border-radius: 8px;

@@ -39,6 +39,9 @@ public class JobAdsController : ControllerBase
     {
         try
         {
+            if (!User.IsInRole("Employer"))
+                return StatusCode(StatusCodes.Status403Forbidden, new { Error = "کارگر اجازه ثبت آگهی ندارد. فقط کارفرما می‌تواند آگهی ثبت کند." });
+
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userIdClaim))
                 return Unauthorized(new { Error = "کاربر شناسایی نشد." });

@@ -1,5 +1,14 @@
 const API_BASE_URL = 'http://localhost:5067/api';
 
+function getTokenRole(token) {
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+        return payload.role || payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+    } catch {
+        return null;
+    }
+}
+
 const urlParams = new URLSearchParams(window.location.search);
 const jobId = urlParams.get('id');
 
@@ -16,6 +25,16 @@ async function loadJobDetail() {
             document.getElementById('jobDetailCard').innerHTML = '<div class="alert alert-danger">آگهی یافت نشد.</div>';
             return;
         }
+
+    if (getTokenRole(token) !== 'Worker') {
+        Swal.fire({
+            title: 'دسترسی غیرمجاز',
+            text: 'کارفرما نمی‌تواند برای کارفرمایان دیگر درخواست انجام کار بدهد. فقط کارگر می‌تواند درخواست ارسال کند.',
+            icon: 'error',
+            confirmButtonText: 'باشه'
+        });
+        return;
+    }
 
         document.getElementById('jobDetailCard').innerHTML = `
             <div class="card-body p-5">
@@ -61,7 +80,7 @@ async function sendRequest(adId) {
             body: JSON.stringify(adId)
         });
 
-        const data = await response.json();
+        const data = await response.json().catch(() => ({}));
         if (response.ok) {
             Swal.fire({
                 title: 'موفق!',
@@ -72,7 +91,7 @@ async function sendRequest(adId) {
         } else {
             Swal.fire({
                 title: 'خطا!',
-                text: data.error || data.Error || 'شما قبلاً درخواست داده‌اید.',
+                text: data.error || data.Error || 'ارسال درخواست مجاز نیست.',
                 icon: 'error',
                 confirmButtonText: 'باشه'
             });

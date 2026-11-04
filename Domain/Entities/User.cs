@@ -12,4 +12,5 @@ public class User
     public ICollection<JobAd> JobAds { get; set; } = new List<JobAd>();
     public ICollection<JobRequest> JobRequests { get; set; } = new List<JobRequest>();
     public ICollection<Review> ReviewsReceived { get; set; } = new List<Review>();
+    public ICollection<WorkerSkill> Skills { get; set; } = new List<WorkerSkill>();
 }

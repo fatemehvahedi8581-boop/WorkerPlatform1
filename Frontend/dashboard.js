@@ -36,6 +36,12 @@ async function loadProfile() {
             </div>
         `;
 
+        const skillsCard = document.getElementById('skillsCard');
+        if (data.role === 'Worker') {
+            skillsCard.style.display = 'block';
+            renderSkills(data.skills || []);
+        }
+
         const historyContainer = document.getElementById('historyContainer');
         if (data.jobHistory.length === 0) {
             historyContainer.innerHTML = '<p class="text-muted">هیچ سابقه‌ای ثبت نشده است.</p>';
@@ -74,6 +80,7 @@ async function loadProfile() {
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h6 class="mb-1 fw-bold">${h.jobTitle}</h6>
+                            ${data.role === 'Employer' ? renderWorkerSkills(h) : ''}
                             <small class="text-muted">تاریخ: ${new Date(h.appliedAt).toLocaleDateString('fa-IR')}</small>
                         </div>
                         <div>${statusBadge}</div>
@@ -88,6 +95,99 @@ async function loadProfile() {
         document.getElementById('profileCard').innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
         document.getElementById('historyContainer').innerHTML = '';
     }
+
+function escapeHtml(value) {
+    return String(value || '').replace(/[&<>'"]/g, character => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+    }[character]));
+}
+
+function levelLabel(level) {
+    return {
+        Beginner: 'مبتدی',
+        Intermediate: 'متوسط',
+        Advanced: 'پیشرفته',
+        Expert: 'حرفه‌ای'
+    }[level] || level;
+}
+
+function renderSkills(skills) {
+    const container = document.getElementById('skillsList');
+    if (!skills.length) {
+        container.innerHTML = '<p class="text-muted small mb-0">هنوز مهارتی ثبت نکرده‌اید.</p>';
+        return;
+    }
+
+    container.innerHTML = skills.map(skill => `
+        <div class="border rounded p-2 mb-2">
+            <div class="d-flex justify-content-between align-items-center">
+                <strong>${escapeHtml(skill.name)}</strong>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteSkill(${skill.id})">حذف</button>
+            </div>
+            <span class="badge bg-info text-dark mt-1">${escapeHtml(levelLabel(skill.level))}</span>
+            ${skill.description ? `<p class="small text-muted mb-0 mt-1">${escapeHtml(skill.description)}</p>` : ''}
+        </div>
+    `).join('');
+}
+
+function renderWorkerSkills(history) {
+    const skills = history.workerSkills || [];
+    if (!skills.length) {
+        return '<div class="small text-muted mt-2">برای این کارگر مهارتی ثبت نشده است.</div>';
+    }
+
+    const skillItems = skills.map(skill => `
+        <li><strong>${escapeHtml(skill.name)}</strong> - ${escapeHtml(levelLabel(skill.level))}${skill.description ? `: ${escapeHtml(skill.description)}` : ''}</li>
+    `).join('');
+
+    return `<div class="worker-skills mt-2"><div class="fw-bold small">مهارت‌های ${escapeHtml(history.workerName)}:</div><ul class="small mb-0">${skillItems}</ul></div>`;
+}
+
+async function addSkill(event) {
+    event.preventDefault();
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_BASE_URL}/WorkerSkills`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+            name: document.getElementById('skillName').value,
+            level: document.getElementById('skillLevel').value,
+            description: document.getElementById('skillDescription').value
+        })
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+        Swal.fire('خطا', data.error || data.Error || 'ثبت مهارت انجام نشد.', 'error');
+        return;
+    }
+
+    document.getElementById('skillForm').reset();
+    loadProfile();
+}
+
+async function deleteSkill(skillId) {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_BASE_URL}/WorkerSkills/${skillId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        Swal.fire('خطا', data.error || data.Error || 'حذف مهارت انجام نشد.', 'error');
+        return;
+    }
+
+    loadProfile();
+}
 }
 
 async function updateStatus(requestId, newStatus) {
@@ -186,3 +286,6 @@ async function showReviewModal(requestId) {
 }
 
 document.addEventListener('DOMContentLoaded', loadProfile);
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('skillForm')?.addEventListener('submit', addSkill);
+});
