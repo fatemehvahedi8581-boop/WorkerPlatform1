@@ -32,7 +32,7 @@ public class WorkerSkillsController : ControllerBase
         var skills = await _context.WorkerSkills
             .Where(s => s.WorkerId == workerId)
             .OrderBy(s => s.Name)
-            .Select(s => new WorkerSkillDto(s.Id, s.Name, s.Level, s.Description))
+            .Select(s => new WorkerSkillDto(s.Id, s.Name, s.Level, s.Description, s.ImageData))
             .ToListAsync(cancellationToken);
 
         return Ok(skills);
@@ -57,6 +57,9 @@ public class WorkerSkillsController : ControllerBase
         if (level is null || !AllowedLevels.Contains(level, StringComparer.OrdinalIgnoreCase))
             return BadRequest(new { Error = "سطح مهارت معتبر نیست." });
 
+        if (!string.IsNullOrWhiteSpace(dto.ImageData) && !IsValidImageData(dto.ImageData))
+            return BadRequest(new { Error = "تصویر مهارت معتبر نیست یا حجم آن بیشتر از ۲ مگابایت است." });
+
         var exists = await _context.WorkerSkills.AnyAsync(
             s => s.WorkerId == workerId && s.Name == name,
             cancellationToken);
@@ -68,13 +71,14 @@ public class WorkerSkillsController : ControllerBase
             WorkerId = workerId,
             Name = name,
             Level = AllowedLevels.First(l => l.Equals(level, StringComparison.OrdinalIgnoreCase)),
-            Description = description
+            Description = description,
+            ImageData = dto.ImageData
         };
 
         _context.WorkerSkills.Add(skill);
         await _context.SaveChangesAsync(cancellationToken);
 
-        return Ok(new WorkerSkillDto(skill.Id, skill.Name, skill.Level, skill.Description));
+        return Ok(new WorkerSkillDto(skill.Id, skill.Name, skill.Level, skill.Description, skill.ImageData));
     }
 
     [HttpDelete("{id:int}")]
@@ -108,7 +112,15 @@ public class WorkerSkillsController : ControllerBase
         error = null;
         return true;
     }
+
+    private static bool IsValidImageData(string value)
+    {
+        return value.Length <= 2_800_000 &&
+               (value.StartsWith("data:image/png;base64,", StringComparison.OrdinalIgnoreCase) ||
+                value.StartsWith("data:image/jpeg;base64,", StringComparison.OrdinalIgnoreCase) ||
+                value.StartsWith("data:image/webp;base64,", StringComparison.OrdinalIgnoreCase));
+    }
 }
 
-public record CreateWorkerSkillDto(string Name, string Level, string? Description);
-public record WorkerSkillDto(int Id, string Name, string Level, string Description);
+public record CreateWorkerSkillDto(string Name, string Level, string? Description, string? ImageData);
+public record WorkerSkillDto(int Id, string Name, string Level, string Description, string? ImageData);

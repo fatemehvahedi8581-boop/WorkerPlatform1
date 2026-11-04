@@ -48,6 +48,10 @@ public class AppDbContext : DbContext, IApplicationDbContext
             .HasMaxLength(30)
             .IsRequired();
 
+        modelBuilder.Entity<User>()
+            .Property(u => u.City)
+            .HasMaxLength(100);
+
         modelBuilder.Entity<WorkerSkill>()
             .HasIndex(s => new { s.WorkerId, s.Name })
             .IsUnique();

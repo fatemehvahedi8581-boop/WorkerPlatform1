@@ -10,6 +10,11 @@ public class UserProfileDto
     public string FullName { get; set; } = string.Empty;
     public string PhoneNumber { get; set; } = string.Empty;
     public string Role { get; set; } = string.Empty;
+    public string? ProfileImageData { get; set; }
+    public int? BirthYear { get; set; }
+    public int? BirthMonth { get; set; }
+    public int? BirthDay { get; set; }
+    public string? City { get; set; }
     public double AverageRating { get; set; }
     public int TotalReviews { get; set; }
     public List<WorkerSkillProfileDto> Skills { get; set; } = new();
@@ -22,6 +27,7 @@ public class WorkerSkillProfileDto
     public string Name { get; set; } = string.Empty;
     public string Level { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
+    public string? ImageData { get; set; }
 }
 
 public class JobHistoryDto
@@ -77,7 +83,8 @@ public class GetUserProfileQueryHandler : IRequestHandler<GetUserProfileQuery, U
                         Id = s.Id,
                         Name = s.Name,
                         Level = s.Level,
-                        Description = s.Description
+                        Description = s.Description,
+                        ImageData = s.ImageData
                     })
                     .ToList()
             })
@@ -90,6 +97,11 @@ public class GetUserProfileQueryHandler : IRequestHandler<GetUserProfileQuery, U
             FullName = user.FullName,
             PhoneNumber = user.PhoneNumber,
             Role = user.Role,
+            ProfileImageData = user.ProfileImageData,
+            BirthYear = user.BirthYear,
+            BirthMonth = user.BirthMonth,
+            BirthDay = user.BirthDay,
+            City = user.City,
             AverageRating = Math.Round(avgRating, 1),
             TotalReviews = reviews.Count,
             Skills = user.Skills
@@ -99,7 +111,8 @@ public class GetUserProfileQueryHandler : IRequestHandler<GetUserProfileQuery, U
                     Id = s.Id,
                     Name = s.Name,
                     Level = s.Level,
-                    Description = s.Description
+                    Description = s.Description,
+                    ImageData = s.ImageData
                 })
                 .ToList(),
             JobHistory = history

@@ -7,6 +7,7 @@ public class WorkerSkill
     public string Name { get; set; } = string.Empty;
     public string Level { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
+    public string? ImageData { get; set; }
 
     public User Worker { get; set; } = null!;
 }

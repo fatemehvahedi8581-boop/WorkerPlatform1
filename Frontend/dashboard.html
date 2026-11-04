@@ -23,6 +23,36 @@
                 <div class="card shadow-sm border-0 text-center p-4" id="profileCard">
                     <div class="spinner-border text-primary mx-auto"></div>
                 </div>
+                <div class="card shadow-sm border-0 mt-4" id="profileEditCard">
+                    <div class="card-header fw-bold">اطلاعات پروفایل</div>
+                    <div class="card-body">
+                        <form id="profileForm">
+                            <div class="mb-2">
+                                <label for="profileImage" class="form-label">عکس پروفایل</label>
+                                <input id="profileImage" type="file" class="form-control" accept="image/png,image/jpeg,image/webp">
+                            </div>
+                            <div class="row">
+                                <div class="col-4 mb-2">
+                                    <label for="birthYear" class="form-label">سال تولد</label>
+                                    <input id="birthYear" type="number" class="form-control" min="1300" max="2100">
+                                </div>
+                                <div class="col-4 mb-2">
+                                    <label for="birthMonth" class="form-label">ماه</label>
+                                    <input id="birthMonth" type="number" class="form-control" min="1" max="12">
+                                </div>
+                                <div class="col-4 mb-2">
+                                    <label for="birthDay" class="form-label">روز</label>
+                                    <input id="birthDay" type="number" class="form-control" min="1" max="31">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="profileCity" class="form-label">شهر</label>
+                                <input id="profileCity" class="form-control" placeholder="مثلاً تهران">
+                            </div>
+                            <button type="submit" class="btn btn-outline-primary w-100">ذخیره اطلاعات پروفایل</button>
+                        </form>
+                    </div>
+                </div>
                 <div class="card shadow-sm border-0 mt-4" id="skillsCard" style="display: none;">
                     <div class="card-header fw-bold">رزومه مهارتی من</div>
                     <div class="card-body">
@@ -43,6 +73,10 @@
                             <div class="mb-3">
                                 <label for="skillDescription" class="form-label">توضیحات</label>
                                 <textarea id="skillDescription" class="form-control" rows="2" placeholder="سابقه و توضیح مهارت"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="skillImage" class="form-label">تصویر مدرک یا نمونه‌کار</label>
+                                <input id="skillImage" type="file" class="form-control" accept="image/png,image/jpeg,image/webp">
                             </div>
                             <button type="submit" class="btn btn-primary w-100">افزودن مهارت</button>
                         </form>

@@ -25,9 +25,9 @@ async function loadProfile() {
 
         document.getElementById('profileCard').innerHTML = `
             <div class="mb-3">
-                <div class="bg-primary text-white rounded-circle d-inline-flex justify-content-center align-items-center" style="width: 70px; height: 70px; font-size: 24px;">
-                    ${data.fullName.charAt(0)}
-                </div>
+                ${data.profileImageData
+                    ? `<img src="${data.profileImageData}" alt="عکس پروفایل" class="rounded-circle object-fit-cover" style="width: 70px; height: 70px;">`
+                    : `<div class="bg-primary text-white rounded-circle d-inline-flex justify-content-center align-items-center" style="width: 70px; height: 70px; font-size: 24px;">${escapeHtml(data.fullName.charAt(0))}</div>`}
             </div>
             <h5 class="fw-bold">${data.fullName}</h5>
             <p class="text-muted mb-2">${data.role === 'Worker' ? 'کارگر' : 'کارفرما'}</p>
@@ -35,6 +35,11 @@ async function loadProfile() {
                 ⭐ میانگین امتیاز: ${data.averageRating} از ۵ (${data.totalReviews} نظر)
             </div>
         `;
+
+        document.getElementById('birthYear').value = data.birthYear || '';
+        document.getElementById('birthMonth').value = data.birthMonth || '';
+        document.getElementById('birthDay').value = data.birthDay || '';
+        document.getElementById('profileCity').value = data.city || '';
 
         const skillsCard = document.getElementById('skillsCard');
         if (data.role === 'Worker') {
@@ -95,6 +100,7 @@ async function loadProfile() {
         document.getElementById('profileCard').innerHTML = `<div class="alert alert-danger">${error.message}</div>`;
         document.getElementById('historyContainer').innerHTML = '';
     }
+}
 
 function escapeHtml(value) {
     return String(value || '').replace(/[&<>'"]/g, character => ({
@@ -130,6 +136,7 @@ function renderSkills(skills) {
             </div>
             <span class="badge bg-info text-dark mt-1">${escapeHtml(levelLabel(skill.level))}</span>
             ${skill.description ? `<p class="small text-muted mb-0 mt-1">${escapeHtml(skill.description)}</p>` : ''}
+            ${skill.imageData ? `<img src="${skill.imageData}" alt="نمونه‌کار ${escapeHtml(skill.name)}" class="img-fluid rounded mt-2" style="max-height: 120px;">` : ''}
         </div>
     `).join('');
 }
@@ -141,15 +148,67 @@ function renderWorkerSkills(history) {
     }
 
     const skillItems = skills.map(skill => `
-        <li><strong>${escapeHtml(skill.name)}</strong> - ${escapeHtml(levelLabel(skill.level))}${skill.description ? `: ${escapeHtml(skill.description)}` : ''}</li>
+        <li class="mb-2"><strong>${escapeHtml(skill.name)}</strong> - ${escapeHtml(levelLabel(skill.level))}${skill.description ? `: ${escapeHtml(skill.description)}` : ''}${skill.imageData ? `<br><img src="${skill.imageData}" alt="نمونه‌کار ${escapeHtml(skill.name)}" class="img-fluid rounded mt-1" style="max-height: 100px;">` : ''}</li>
     `).join('');
 
     return `<div class="worker-skills mt-2"><div class="fw-bold small">مهارت‌های ${escapeHtml(history.workerName)}:</div><ul class="small mb-0">${skillItems}</ul></div>`;
 }
 
+function readImageData(file) {
+    return new Promise((resolve, reject) => {
+        if (!file) {
+            resolve(null);
+            return;
+        }
+        if (file.size > 2 * 1024 * 1024) {
+            reject(new Error('حجم تصویر نباید بیشتر از ۲ مگابایت باشد.'));
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error('خواندن تصویر انجام نشد.'));
+        reader.readAsDataURL(file);
+    });
+}
+
+async function updateProfile(event) {
+    event.preventDefault();
+    const token = localStorage.getItem('token');
+    try {
+        const imageData = await readImageData(document.getElementById('profileImage').files[0]);
+        const response = await fetch(`${API_BASE_URL}/Users/${getUserIdFromToken(token)}/profile`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                profileImageData: imageData,
+                birthYear: Number(document.getElementById('birthYear').value) || null,
+                birthMonth: Number(document.getElementById('birthMonth').value) || null,
+                birthDay: Number(document.getElementById('birthDay').value) || null,
+                city: document.getElementById('profileCity').value
+            })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || data.Error || 'ذخیره پروفایل انجام نشد.');
+        Swal.fire('موفق!', 'اطلاعات پروفایل ذخیره شد.', 'success');
+        loadProfile();
+    } catch (error) {
+        Swal.fire('خطا', error.message, 'error');
+    }
+}
+
 async function addSkill(event) {
     event.preventDefault();
     const token = localStorage.getItem('token');
+    let imageData;
+    try {
+        imageData = await readImageData(document.getElementById('skillImage').files[0]);
+    } catch (error) {
+        Swal.fire('خطا', error.message, 'error');
+        return;
+    }
     const response = await fetch(`${API_BASE_URL}/WorkerSkills`, {
         method: 'POST',
         headers: {
@@ -159,7 +218,8 @@ async function addSkill(event) {
         body: JSON.stringify({
             name: document.getElementById('skillName').value,
             level: document.getElementById('skillLevel').value,
-            description: document.getElementById('skillDescription').value
+            description: document.getElementById('skillDescription').value,
+            imageData
         })
     });
 
@@ -187,7 +247,6 @@ async function deleteSkill(skillId) {
     }
 
     loadProfile();
-}
 }
 
 async function updateStatus(requestId, newStatus) {
@@ -287,5 +346,6 @@ async function showReviewModal(requestId) {
 
 document.addEventListener('DOMContentLoaded', loadProfile);
 document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('profileForm')?.addEventListener('submit', updateProfile);
     document.getElementById('skillForm')?.addEventListener('submit', addSkill);
 });
